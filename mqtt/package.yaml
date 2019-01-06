@@ -1,0 +1,58 @@
+name:                mqtt
+version:             0.1.0.0
+github:              "atopuzov/mqtt"
+license:             BSD3
+author:              "Aleksandar Topuzovic"
+maintainer:          "aleksandar.topuzovic@gmail.com"
+copyright:           "2019 Aleksandar Topuzovic"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/atopuzov/mqtt#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+- mqtt-hs
+- stm
+- async
+- text
+- aeson
+- influxdb
+- lens
+- containers
+- time
+- mtl
+
+library:
+  source-dirs: src
+
+executables:
+  mqtt-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - mqtt
+
+tests:
+  mqtt-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - mqtt
