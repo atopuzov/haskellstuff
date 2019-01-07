@@ -4,6 +4,7 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE RecordWildCards            #-}
 {-# LANGUAGE TypeFamilies               #-}
+{-# LANGUAGE ConstraintKinds            #-}
 -- {-# LANGUAGE NoImplicitPrelude          #-}
 module Main where
 
@@ -27,14 +28,16 @@ import qualified Database.InfluxDB as InfluxDB
 import qualified Database.InfluxDB.Types as InfluxDB.Types
 import qualified Network.MQTT as MQTT
 
-data AppConfig = AppConfig {
+data AppOptions = AppOptions {
   mqttConfig :: MQTT.Config
   , influxWp :: InfluxDB.WriteParams
   }
 
+type AppConfig = MonadReader AppOptions
+
 newtype App a = App {
-  runApp :: ReaderT AppConfig IO a
-  } deriving (Functor, Applicative, Monad, MonadReader AppConfig, MonadIO)
+  runApp :: ReaderT AppOptions IO a
+  } deriving (Functor, Applicative, Monad, AppConfig, MonadIO)
 
 data Measurement = SHT30 {
     mTemperature :: Double
@@ -50,7 +53,7 @@ instance FromJSON Measurement where
     return SHT30{..}
 
 -- Write data to InfluxDB
-writeData :: (MonadReader AppConfig m, MonadIO m) => Measurement -> m ()
+writeData :: (AppConfig m, MonadIO m) => Measurement -> m ()
 writeData val = do
   writeParams <- influxWp <$> ask
 
@@ -66,6 +69,7 @@ writeData val = do
     ]
 
 -- Decode MQTT message
+decodeMsg :: MQTT.Message 'MQTT.PUBLISH -> Maybe Measurement
 decodeMsg mqttMessage = decodeStrict payload :: Maybe Measurement
   where
     payload = MQTT.payload . MQTT.body $ mqttMessage
@@ -82,7 +86,7 @@ main = do
 
   let wp = InfluxDB.writeParams (InfluxDB.Types.Database $ "temperature") & InfluxDB.precision .~ InfluxDB.Second
 
-  let appCfg = AppConfig config wp
+  let appCfg = AppOptions config wp
   runReaderT (runApp app) appCfg
 
 -- app :: App ()
