@@ -15,7 +15,7 @@ import Control.Concurrent.STM.TChan (newTChanIO, readTChan)
 import Control.Lens ((?~), (.~), (&))
 import Control.Monad (void, forever)
 import Control.Monad.STM (atomically)
-import Control.Monad.Reader (ask, runReaderT, MonadReader, ReaderT)
+import Control.Monad.Reader (asks, runReaderT, MonadReader, ReaderT)
 import Control.Monad.Except (ExceptT, runExceptT)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 
@@ -29,9 +29,11 @@ import qualified Control.Exception as E
 import qualified Database.InfluxDB as InfluxDB
 import qualified Database.InfluxDB.Types as InfluxDB.Types
 import qualified Network.MQTT as MQTT
+import qualified Network.MQTT.Types as MQTT.Types
 
 data AppOptions = AppOptions {
   mqttConfig :: MQTT.Config
+  , mqttTopic :: MQTT.Types.Topic
   , influxWp :: InfluxDB.WriteParams
   }
 
@@ -59,7 +61,7 @@ instance FromJSON Measurement where
 -- Write data to InfluxDB
 writeData :: (AppConfig m, MonadIO m) => Measurement -> m ()
 writeData val = do
-  writeParams <- influxWp <$> ask
+  writeParams <- asks influxWp
 
   let client = Map.singleton "client" $ InfluxDB.Types.Key $ mClientID val
 
@@ -94,17 +96,19 @@ main = do
                                               }
 
   let wp = InfluxDB.writeParams (InfluxDB.Types.Database $ "temperature") & InfluxDB.precision .~ InfluxDB.Second
+  let topic = MQTT.Types.toTopic $ MQTT.Types.MqttText "outTopic"
+  let appCfg = AppOptions config topic wp
 
-  let appCfg = AppOptions config wp
   either renderError return =<< runExceptT (runReaderT (runApp app) appCfg)
 
 -- app :: App ()
 app = do
-  config <- mqttConfig <$> ask
+  config <- asks mqttConfig
+  topic <- asks mqttTopic
 
   liftIO $ do
     mqtt <- async $ void $ MQTT.run config
-    MQTT.subscribe config [("outTopic", MQTT.Handshake)]
+    MQTT.subscribe config [(topic, MQTT.Handshake)]
 
   forever $ do
     message <- liftIO $ atomically $ readTChan (MQTT.cPublished config)
