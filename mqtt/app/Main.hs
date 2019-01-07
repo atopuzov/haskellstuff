@@ -14,10 +14,10 @@ import Control.Concurrent.STM.TChan (newTChanIO, readTChan)
 import Control.Lens ((?~), (.~), (&))
 import Control.Monad (void, forever)
 import Control.Monad.STM (atomically)
-import Control.Monad.Reader (ask, runReaderT, MonadReader, ReaderT, lift)
+import Control.Monad.Reader (ask, runReaderT, MonadReader, ReaderT)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 
-import Data.Aeson (decodeStrict, parseJSON, toJSON, withObject, (.:), (.=), object)
+import Data.Aeson (decodeStrict, parseJSON, withObject, (.:), (.=), object)
 import Data.Aeson.Types (FromJSON)
 import Data.Text (Text)
 import Data.Time.Clock (UTCTime)
@@ -28,9 +28,8 @@ import qualified Database.InfluxDB.Types as InfluxDB.Types
 import qualified Network.MQTT as MQTT
 
 data AppConfig = AppConfig {
-  mqttHost :: Text
-  , mqttTopic :: Text
-  , influxDbDatabase :: Text
+  mqttConfig :: MQTT.Config
+  , influxWp :: InfluxDB.WriteParams
   }
 
 newtype App a = App {
@@ -51,10 +50,13 @@ instance FromJSON Measurement where
     return SHT30{..}
 
 -- Write data to InfluxDB
-writeData wp val = do
+writeData :: (MonadReader AppConfig m, MonadIO m) => Measurement -> m ()
+writeData val = do
+  writeParams <- influxWp <$> ask
+
   let client = Map.singleton "client" $ InfluxDB.Types.Key $ mClientID val
 
-  InfluxDB.writeBatch wp
+  liftIO $ InfluxDB.writeBatch writeParams
     [ InfluxDB.Line "temperature" client
       (Map.singleton "value" $ InfluxDB.FieldFloat $ mTemperature val)
       (Nothing :: Maybe UTCTime),
@@ -64,36 +66,39 @@ writeData wp val = do
     ]
 
 -- Decode MQTT message
-handleMsg msg = do
-  let payload = MQTT.payload . MQTT.body $ msg
-  return (decodeStrict payload :: Maybe Measurement)
+decodeMsg mqttMessage = decodeStrict payload :: Maybe Measurement
+  where
+    payload = MQTT.payload . MQTT.body $ mqttMessage
 
 main :: IO ()
 main = do
-  let appCfg = AppConfig "dubpi.local" "outTopic" "temperature"
-  runReaderT (runApp app) appCfg
+  cmds <- MQTT.mkCommands
+  chan <- newTChanIO
 
-app :: App ()
-app = do
-  cmds <- liftIO MQTT.mkCommands
-  chan <- liftIO newTChanIO
-
-  env <- ask
   let config = (MQTT.defaultConfig cmds chan) {   MQTT.cHost = "10.147.19.189"
-                                                , MQTT.cClientID = "haskell-mqtt"
+                                                , MQTT.cClientID = "haskell-mqtt-2"
                                                 , MQTT.cKeepAlive = Just 10
                                               }
-  let wp = InfluxDB.writeParams (InfluxDB.Types.Database $ influxDbDatabase env) & InfluxDB.precision .~ InfluxDB.Second
 
+  let wp = InfluxDB.writeParams (InfluxDB.Types.Database $ "temperature") & InfluxDB.precision .~ InfluxDB.Second
+
+  let appCfg = AppConfig config wp
+  runReaderT (runApp app) appCfg
+
+-- app :: App ()
+app = do
+  config <- mqttConfig <$> ask
 
   liftIO $ do
     mqtt <- async $ void $ MQTT.run config
     MQTT.subscribe config [("outTopic", MQTT.Handshake)]
-    forever $ do
-      message <- atomically $ readTChan (MQTT.cPublished config)
-      decoded <- handleMsg message
-      case decoded of
-        Just value -> do
-          putStrLn $ "Received: " ++ show value
-          writeData wp value
-        Nothing -> putStrLn "Unable to decode data."
+
+  forever $ do
+    message <- liftIO $ atomically $ readTChan (MQTT.cPublished config)
+
+    let decoded = decodeMsg message
+    case decoded of
+      Just value -> do
+        liftIO $ putStrLn $ "Received: " ++ show value
+        writeData value
+      Nothing -> liftIO $ putStrLn "Unable to decode data."
