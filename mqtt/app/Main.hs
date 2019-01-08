@@ -23,8 +23,11 @@ import Data.Aeson (decodeStrict, parseJSON, withObject, (.:), (.=), object)
 import Data.Aeson.Types (FromJSON)
 import Data.Text (Text)
 import Data.Time.Clock (UTCTime)
+import Data.Maybe (fromJust)
 
 import qualified Data.Map as Map
+import qualified Data.UUID as UUID
+import qualified Data.UUID.V1 as UUID.V1
 import qualified Control.Exception as E
 import qualified Database.InfluxDB as InfluxDB
 import qualified Database.InfluxDB.Types as InfluxDB.Types
@@ -90,9 +93,11 @@ main = do
   cmds <- MQTT.mkCommands
   chan <- newTChanIO
 
+  clientId <- UUID.V1.nextUUID
   let config = (MQTT.defaultConfig cmds chan) {   MQTT.cHost = "10.147.19.189"
-                                                , MQTT.cClientID = "haskell-mqtt-2"
+                                                , MQTT.cClientID = UUID.toText $ fromJust clientId
                                                 , MQTT.cKeepAlive = Just 10
+                                                , MQTT.cLogDebug = putStrLn
                                               }
 
   let wp = InfluxDB.writeParams (InfluxDB.Types.Database $ "temperature") & InfluxDB.precision .~ InfluxDB.Second

@@ -31,6 +31,7 @@ dependencies:
 - containers
 - time
 - mtl
+- uuid
 
 library:
   source-dirs: src
