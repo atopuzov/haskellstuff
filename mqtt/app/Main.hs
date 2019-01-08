@@ -79,9 +79,7 @@ writeData val = do
 
 -- Decode MQTT message
 decodeMsg :: MQTT.Message 'MQTT.PUBLISH -> Maybe Measurement
-decodeMsg mqttMessage = decodeStrict payload :: Maybe Measurement
-  where
-    payload = MQTT.payload . MQTT.body $ mqttMessage
+decodeMsg = decodeStrict . MQTT.payload . MQTT.body
 
 renderError :: AppError -> IO ()
 renderError (IOError e) = do
