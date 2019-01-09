@@ -24,6 +24,8 @@ import Data.Aeson.Types (FromJSON)
 import Data.Maybe (fromJust)
 import Data.Text (Text)
 import Data.Time.Clock (UTCTime)
+import System.Exit (exitFailure)
+import System.IO (hPutStrLn, stderr, stdout)
 
 import qualified Data.Map as Map
 import qualified Data.UUID as UUID
@@ -91,7 +93,8 @@ main = do
   chan <- newTChanIO
 
   clientId <- UUID.V1.nextUUID
-  let config = (MQTT.defaultConfig cmds chan) {   MQTT.cHost = "10.147.19.189"
+  let config = (MQTT.defaultConfig cmds chan) {
+                                                  MQTT.cHost = "dubpi.local"
                                                 , MQTT.cClientID = UUID.toText $ fromJust clientId
                                                 , MQTT.cKeepAlive = Just 10
                                                 -- , MQTT.cLogDebug = putStrLn
@@ -103,17 +106,13 @@ main = do
 
   either renderError return =<< runExceptT (runReaderT (runApp app) appCfg)
 
-forkConfig c = do r <- ask
-                  liftIO . forkIO $ runReaderT c r
-
 app :: App ()
 app = do
   config <- asks mqttConfig
   topic <- asks mqttTopic
-  wp <- asks influxWp
+
   env <- ask
 
-  -- _ <- liftIO . forkIO $ do
   _ <- liftIO . forkIO $ do
     qosGranted <- MQTT.subscribe config [(topic, MQTT.Handshake)]
     case qosGranted of
@@ -121,13 +120,14 @@ app = do
         msg <- fmap decodeMsg $ atomically $ readTChan (MQTT.cPublished config)
         case msg of
           Just value -> do
-            putStrLn $ "Received: " ++ show value
+            hPutStrLn stdout $ "Received: " ++ show value
             runReaderT (writeData value) env
-          Nothing -> liftIO $ putStrLn "Unable to decode data."
+          Nothing -> putStrLn "Unable to decode data."
       _ -> do
-        liftIO $ putStrLn $ "Wanted QoS Handshake, got " ++ show qosGranted
+        hPutStrLn stderr $ "Wanted QoS Handshake, got " ++ show qosGranted
+        exitFailure
 
   -- this will throw IOExceptions
   -- Exception: <socket: 12>: hLookAhead: resource vanished (Connection reset by peer)
   terminated <- liftIO $ MQTT.run config
-  liftIO $ print terminated
+  liftIO $ hPutStrLn stderr $ "Terminated:" ++ show terminated
