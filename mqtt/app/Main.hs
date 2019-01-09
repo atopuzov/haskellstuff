@@ -111,17 +111,18 @@ app = do
   config <- asks mqttConfig
   topic <- asks mqttTopic
   wp <- asks influxWp
+  env <- ask
 
   -- _ <- liftIO . forkIO $ do
-  _ <- forkConfig $ do
-    qosGranted <- liftIO $ MQTT.subscribe config [(topic, MQTT.Handshake)]
+  _ <- liftIO . forkIO $ do
+    qosGranted <- MQTT.subscribe config [(topic, MQTT.Handshake)]
     case qosGranted of
       [MQTT.Handshake] -> forever $ do
-        msg <- fmap decodeMsg $ liftIO $ atomically $ readTChan (MQTT.cPublished config)
+        msg <- fmap decodeMsg $ atomically $ readTChan (MQTT.cPublished config)
         case msg of
           Just value -> do
-            liftIO $ putStrLn $ "Received: " ++ show value
-            writeData value
+            putStrLn $ "Received: " ++ show value
+            runReaderT (writeData value) env
           Nothing -> liftIO $ putStrLn "Unable to decode data."
       _ -> do
         liftIO $ putStrLn $ "Wanted QoS Handshake, got " ++ show qosGranted
