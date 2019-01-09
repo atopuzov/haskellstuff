@@ -10,20 +10,22 @@ module Main where
 
 import Lib
 
+import Control.Concurrent (forkIO)
 import Control.Concurrent.Async (async)
-import Control.Concurrent.STM.TChan (newTChanIO, readTChan)
+import Control.Concurrent.STM (newTChanIO, readTChan)
 import Control.Lens ((?~), (.~), (&))
 import Control.Monad (void, forever)
-import Control.Monad.STM (atomically)
-import Control.Monad.Reader (asks, runReaderT, MonadReader, ReaderT)
-import Control.Monad.Except (ExceptT, runExceptT)
+import Control.Monad.Except (MonadError, ExceptT, runExceptT)
 import Control.Monad.IO.Class (MonadIO, liftIO)
-
-import Data.Aeson (decodeStrict, parseJSON, withObject, (.:), (.=), object)
+import Control.Monad.Reader (ask, asks, runReaderT, MonadReader, ReaderT)
+import Control.Monad.STM (atomically)
+import Data.Aeson (decodeStrict, parseJSON, withObject, (.:), (.=))
 import Data.Aeson.Types (FromJSON)
+import Data.Maybe (fromJust)
 import Data.Text (Text)
 import Data.Time.Clock (UTCTime)
-import Data.Maybe (fromJust)
+import System.Exit (exitFailure)
+import System.IO (hPutStrLn, stderr, stdout)
 
 import qualified Data.Map as Map
 import qualified Data.UUID as UUID
@@ -46,7 +48,7 @@ data AppError = IOError E.IOException
 
 newtype App a = App {
   runApp :: ReaderT AppOptions (ExceptT AppError IO) a
-  } deriving (Functor, Applicative, Monad, AppConfig, MonadIO)
+  } deriving (Functor, Applicative, Monad, AppConfig, MonadIO, MonadError AppError)
 
 data Measurement = SHT30 {
     mTemperature :: Double
@@ -65,7 +67,6 @@ instance FromJSON Measurement where
 writeData :: (AppConfig m, MonadIO m) => Measurement -> m ()
 writeData val = do
   writeParams <- asks influxWp
-
   let client = Map.singleton "client" $ InfluxDB.Types.Key $ mClientID val
 
   liftIO $ InfluxDB.writeBatch writeParams
@@ -92,10 +93,11 @@ main = do
   chan <- newTChanIO
 
   clientId <- UUID.V1.nextUUID
-  let config = (MQTT.defaultConfig cmds chan) {   MQTT.cHost = "10.147.19.189"
+  let config = (MQTT.defaultConfig cmds chan) {
+                                                  MQTT.cHost = "dubpi.local"
                                                 , MQTT.cClientID = UUID.toText $ fromJust clientId
                                                 , MQTT.cKeepAlive = Just 10
-                                                , MQTT.cLogDebug = putStrLn
+                                                -- , MQTT.cLogDebug = putStrLn
                                               }
 
   let wp = InfluxDB.writeParams (InfluxDB.Types.Database $ "temperature") & InfluxDB.precision .~ InfluxDB.Second
@@ -104,21 +106,28 @@ main = do
 
   either renderError return =<< runExceptT (runReaderT (runApp app) appCfg)
 
--- app :: App ()
+app :: App ()
 app = do
   config <- asks mqttConfig
   topic <- asks mqttTopic
 
-  liftIO $ do
-    mqtt <- async $ void $ MQTT.run config
-    MQTT.subscribe config [(topic, MQTT.Handshake)]
+  env <- ask
 
-  forever $ do
-    message <- liftIO $ atomically $ readTChan (MQTT.cPublished config)
+  _ <- liftIO . forkIO $ do
+    qosGranted <- MQTT.subscribe config [(topic, MQTT.Handshake)]
+    case qosGranted of
+      [MQTT.Handshake] -> forever $ do
+        msg <- fmap decodeMsg $ atomically $ readTChan (MQTT.cPublished config)
+        case msg of
+          Just value -> do
+            hPutStrLn stdout $ "Received: " ++ show value
+            runReaderT (writeData value) env
+          Nothing -> putStrLn "Unable to decode data."
+      _ -> do
+        hPutStrLn stderr $ "Wanted QoS Handshake, got " ++ show qosGranted
+        exitFailure
 
-    let decoded = decodeMsg message
-    case decoded of
-      Just value -> do
-        liftIO $ putStrLn $ "Received: " ++ show value
-        writeData value
-      Nothing -> liftIO $ putStrLn "Unable to decode data."
+  -- this will throw IOExceptions
+  -- Exception: <socket: 12>: hLookAhead: resource vanished (Connection reset by peer)
+  terminated <- liftIO $ MQTT.run config
+  liftIO $ hPutStrLn stderr $ "Terminated:" ++ show terminated
