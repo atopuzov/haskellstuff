@@ -62,7 +62,7 @@ instance FromJSON Measurement where
     return SHT30{..}
 
 -- Write data to InfluxDB
-writeData :: (MonadReader AppOptions m, MonadIO m) => Measurement -> m ()
+writeData :: (AppConfig m, MonadIO m) => Measurement -> m ()
 writeData val = do
   writeParams <- asks influxWp
   let client = Map.singleton "client" $ InfluxDB.Types.Key $ mClientID val
