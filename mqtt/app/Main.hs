@@ -25,7 +25,7 @@ import Data.Maybe (fromJust)
 import Data.Text (Text)
 import Data.Time.Clock (UTCTime)
 import System.Exit (exitFailure)
-import System.IO (hPutStrLn, stderr, stdout)
+import System.IO (hSetBuffering, hPutStrLn, stderr, stdout, BufferMode(NoBuffering))
 
 import qualified Data.Map as Map
 import qualified Data.UUID as UUID
@@ -89,6 +89,7 @@ renderError (IOError e) = do
 
 main :: IO ()
 main = do
+  hSetBuffering stdout NoBuffering
   cmds <- MQTT.mkCommands
   chan <- newTChanIO
 
