@@ -13,7 +13,7 @@ build:
 
 .PHONY: run
 run:
-	stack ghci
+	stack run
 
 .PHONY: ghci
 ghci:
