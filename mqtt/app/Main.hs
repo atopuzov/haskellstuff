@@ -1,45 +1,48 @@
+{-# LANGUAGE ConstraintKinds            #-}
 {-# LANGUAGE DataKinds                  #-}
 {-# LANGUAGE FlexibleContexts           #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE RecordWildCards            #-}
 {-# LANGUAGE TypeFamilies               #-}
-{-# LANGUAGE ConstraintKinds            #-}
 -- {-# LANGUAGE NoImplicitPrelude          #-}
 module Main where
 
-import Lib
+import           Lib
 
-import Control.Concurrent (forkIO)
-import Control.Concurrent.Async (async)
-import Control.Concurrent.STM (newTChanIO, readTChan)
-import Control.Lens ((?~), (.~), (&))
-import Control.Monad (void, forever)
-import Control.Monad.Except (MonadError, ExceptT, runExceptT)
-import Control.Monad.IO.Class (MonadIO, liftIO)
-import Control.Monad.Reader (ask, asks, runReaderT, MonadReader, ReaderT)
-import Control.Monad.STM (atomically)
-import Data.Aeson (decodeStrict, parseJSON, withObject, (.:), (.=))
-import Data.Aeson.Types (FromJSON)
-import Data.Maybe (fromJust)
-import Data.Text (Text)
-import Data.Time.Clock (UTCTime)
-import System.Exit (exitFailure)
-import System.IO (hSetBuffering, hPutStrLn, stderr, stdout, BufferMode(NoBuffering))
+import           Control.Concurrent       (forkIO)
+import           Control.Concurrent.Async (async)
+import           Control.Concurrent.STM   (newTChanIO, readTChan)
+import           Control.Lens             ((&), (.~), (?~))
+import           Control.Monad            (forever, void)
+import           Control.Monad.Except     (ExceptT, MonadError, runExceptT)
+import           Control.Monad.IO.Class   (MonadIO, liftIO)
+import           Control.Monad.Reader     (MonadReader, ReaderT, ask, asks,
+                                           runReaderT)
+import           Control.Monad.STM        (atomically)
+import           Data.Aeson               (decodeStrict, parseJSON, withObject,
+                                           (.:), (.=))
+import           Data.Aeson.Types         (FromJSON)
+import           Data.Maybe               (fromJust)
+import           Data.Text                (Text)
+import           Data.Time.Clock          (UTCTime)
+import           System.Exit              (exitFailure)
+import           System.IO                (BufferMode (NoBuffering), hPutStrLn,
+                                           hSetBuffering, stderr, stdout)
 
-import qualified Data.Map as Map
-import qualified Data.UUID as UUID
-import qualified Data.UUID.V1 as UUID.V1
-import qualified Control.Exception as E
-import qualified Database.InfluxDB as InfluxDB
-import qualified Database.InfluxDB.Types as InfluxDB.Types
-import qualified Network.MQTT as MQTT
-import qualified Network.MQTT.Types as MQTT.Types
+import qualified Control.Exception        as E
+import qualified Data.Map                 as Map
+import qualified Data.UUID                as UUID
+import qualified Data.UUID.V1             as UUID.V1
+import qualified Database.InfluxDB        as InfluxDB
+import qualified Database.InfluxDB.Types  as InfluxDB.Types
+import qualified Network.MQTT             as MQTT
+import qualified Network.MQTT.Types       as MQTT.Types
 
 data AppOptions = AppOptions {
-  mqttConfig :: MQTT.Config
+  mqttConfig  :: MQTT.Config
   , mqttTopic :: MQTT.Types.Topic
-  , influxWp :: InfluxDB.WriteParams
+  , influxWp  :: InfluxDB.WriteParams
   }
 
 type AppConfig = MonadReader AppOptions
@@ -52,8 +55,8 @@ newtype App a = App {
 
 data Measurement = SHT30 {
     mTemperature :: Double
-  , mHumidity :: Double
-  , mClientID :: Text
+  , mHumidity    :: Double
+  , mClientID    :: Text
 } deriving Show
 
 instance FromJSON Measurement where
@@ -130,5 +133,7 @@ app = do
 
   -- this will throw IOExceptions
   -- Exception: <socket: 12>: hLookAhead: resource vanished (Connection reset by peer)
+  -- Network.Socket.getAddrInfo (called with preferred socket type/protocol: AddrInfo {addrFlags = [AI_ADDRCONFIG], addrFamily = AF_UNSPEC, addrSocketType = Stream, addrProtocol = 6, addrAddress = <assumed to be undefined>, addrCanonName = <assumed to be undefined>}, host name: Just "dubpi.local", service name: Just "1883"): does not exist (System error)
+  --  (ConnectionFailure Network.Socket.connect: <socket: 13>: does not exist (Connection refused)))
   terminated <- liftIO $ MQTT.run config
   liftIO $ hPutStrLn stderr $ "Terminated:" ++ show terminated
