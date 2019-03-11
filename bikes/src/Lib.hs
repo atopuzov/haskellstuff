@@ -5,7 +5,7 @@ module Lib
     ( someFunc, Station(..)
     ) where
 
-import Data.Aeson (decodeStrict, parseJSON, withObject, (.:), (.=))
+import Data.Aeson (decode, parseJSON, withObject, (.:), (.=))
 import Data.Aeson.Types (FromJSON)
 import Network.HTTP.Client
 import Network.HTTP.Client.TLS
@@ -39,11 +39,8 @@ instance FromJSON Station where
     availableBikeStands <- o .: "available_bike_stands"
     return Station{..}
 
-
-someFunc :: IO ()
-someFunc = do
-  manager <- newManager tlsManagerSettings
-
+getJson :: FromJSON a => IO a
+getJson = do
   request <- parseRequest "https://api.jcdecaux.com"
   let request'
         = setRequestMethod "GET"
@@ -52,8 +49,15 @@ someFunc = do
                                   , ("apiKey", Just "a360b2a061d254a3a5891e4415511251899f6df1")
                                   ]
           $ request
+  response <- httpJSON request'
+  return $ getResponseBody response
 
-  response <- httpLBS request'
+getBikes :: IO [Station]
+getBikes = getJson
 
-  putStrLn $ "The status code was: " ++ show (getResponseStatusCode response)
-  putStrLn $ show (getResponseBody response)
+someFunc :: IO ()
+someFunc = do
+  manager <- newManager tlsManagerSettings
+
+  bikes <- getBikes
+  putStrLn $ show bikes
