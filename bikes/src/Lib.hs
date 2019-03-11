@@ -28,8 +28,9 @@ data Station = Station {
     number :: Int
   , bikeStands :: Int
   , availableBikes :: Int
-  , availableBikeStands :: Integer
-                          } deriving Show
+  , availableBikeStands :: Int
+  , timestamp :: Int
+  } deriving Show
 
 instance FromJSON Station where
   parseJSON = withObject "Station" $ \o -> do
@@ -37,6 +38,7 @@ instance FromJSON Station where
     bikeStands          <- o .: "bike_stands"
     availableBikes      <- o .: "available_bikes"
     availableBikeStands <- o .: "available_bike_stands"
+    timestamp           <- o .: "last_update"
     return Station{..}
 
 getJson :: FromJSON a => IO a
