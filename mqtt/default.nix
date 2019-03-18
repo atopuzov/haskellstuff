@@ -1,2 +1,7 @@
-{ nixpkgs ? import <nixpkgs> {}, compiler ? "ghc844" }:
-nixpkgs.pkgs.haskell.packages.${compiler}.callPackage ./mqtt.nix { }
+{ pkgs ? import <nixpkgs> {}
+}:
+
+let
+  stack-pkgs = pkgs.callPackage ./nix {};
+in
+  stack-pkgs.mqtt
