@@ -25,6 +25,7 @@ dependencies:
 - http-client
 - http-client-tls
 - http-conduit
+- geohash == 1.0.1
 
 library:
   source-dirs: src

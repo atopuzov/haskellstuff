@@ -6,10 +6,12 @@ module Lib
     ) where
 
 import Data.Aeson (decode, parseJSON, withObject, (.:), (.=))
-import Data.Aeson.Types (FromJSON)
+import Data.Aeson.Types (FromJSON, Parser)
 import Network.HTTP.Client
 import Network.HTTP.Client.TLS
 import Network.HTTP.Simple
+import qualified Data.Geohash
+import qualified Data.Maybe
 
 -- {"number":42,
 --  "contract_name":"Dublin",
@@ -25,20 +27,27 @@ import Network.HTTP.Simple
 --  "last_update":1552330831000},
 
 data Station = Station {
-    number :: Int
+    standNumber :: Int
   , bikeStands :: Int
   , availableBikes :: Int
   , availableBikeStands :: Int
   , timestamp :: Int
+  -- , lat :: Double
+  -- , lng :: Double
+  , geohash :: String
   } deriving Show
 
 instance FromJSON Station where
   parseJSON = withObject "Station" $ \o -> do
-    number              <- o .: "number"
+    standNumber         <- o .: "number"
     bikeStands          <- o .: "bike_stands"
     availableBikes      <- o .: "available_bikes"
     availableBikeStands <- o .: "available_bike_stands"
     timestamp           <- o .: "last_update"
+    position            <- o .: "position"
+    lat                 <- position .: "lat" :: Parser Double
+    lng                 <- position .: "lng" :: Parser Double
+    let geohash = Data.Maybe.fromJust $ Data.Geohash.encode 10 (lat, lng)
     return Station{..}
 
 getJson :: FromJSON a => IO a
