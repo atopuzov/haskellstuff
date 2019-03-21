@@ -25,6 +25,11 @@ dependencies:
 - http-client
 - http-client-tls
 - http-conduit
+- influxdb
+- mtl
+- lens
+- time
+- containers
 - geohash == 1.0.1
 
 library:

@@ -1,9 +1,12 @@
 {-# LANGUAGE RecordWildCards            #-}
 {-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE FlexibleContexts           #-}
 
 module Lib
     ( someFunc, Station(..)
     ) where
+
+import Config
 
 import Data.Aeson (decode, parseJSON, withObject, (.:), (.=))
 import Data.Aeson.Types (FromJSON, Parser)
@@ -12,6 +15,12 @@ import Network.HTTP.Client.TLS
 import Network.HTTP.Simple
 import qualified Data.Geohash
 import qualified Data.Maybe
+import           Control.Monad.IO.Class   (MonadIO, liftIO)
+import           Control.Monad.Reader     (MonadReader,  asks)
+import           Data.Time.Clock          (UTCTime)
+import qualified Database.InfluxDB        as InfluxDB
+import qualified Data.Map                 as Map
+import qualified Database.InfluxDB.Types  as InfluxDB.Types
 
 -- {"number":42,
 --  "contract_name":"Dublin",
@@ -72,3 +81,15 @@ someFunc = do
 
   bikes <- getBikes
   putStrLn $ show bikes
+
+
+writeData :: (AppConfig m, MonadIO m) => [Station] -> m ()
+writeData val = do
+  writeParams <- asks influxWp
+  let client = Map.singleton "client" $ InfluxDB.Types.Key $ "kurac"
+
+  liftIO $ InfluxDB.writeBatch writeParams
+    [ InfluxDB.Line "temperature" client
+      (Map.singleton "available" $ InfluxDB.FieldFloat $ 10)
+      (Nothing :: Maybe UTCTime)
+    ]
