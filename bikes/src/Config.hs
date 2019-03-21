@@ -3,22 +3,29 @@
 
 module Config where
 
-import           Control.Monad.Reader   (MonadReader, ReaderT)
-import           Control.Monad.IO.Class (MonadIO)
+import           Control.Exception      (IOException)
 import           Control.Monad.Except   (ExceptT, MonadError)
-import qualified Control.Exception      as E
-
+import           Control.Monad.IO.Class (MonadIO)
+import           Control.Monad.Reader   (MonadReader, ReaderT)
 import qualified Database.InfluxDB      as InfluxDB
-import qualified Database.InfluxDB.Types  as InfluxDB.Types
-
 
 data AppOptions = AppOptions {
-  influxWp  :: InfluxDB.WriteParams
+    influxWp :: InfluxDB.WriteParams
+  , apiKey   :: String
 }
+
 type AppConfig = MonadReader AppOptions
 
-data AppError = IOError E.IOException
+data AppError = IOError IOException
+
+type AppState a = ReaderT AppOptions (ExceptT AppError IO) a
 
 newtype App a = App {
-  runApp :: ReaderT AppOptions (ExceptT AppError IO) a
-  } deriving (Functor, Applicative, Monad, AppConfig, MonadIO, MonadError AppError)
+  runApp :: AppState a
+  } deriving ( Functor
+             , Applicative
+             , Monad
+             , AppConfig
+             , MonadIO
+             , MonadError AppError
+             )
