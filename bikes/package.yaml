@@ -29,6 +29,7 @@ dependencies:
 - mtl
 - lens
 - time
+- text
 - containers
 - geohash == 1.0.1
 

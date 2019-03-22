@@ -14,6 +14,7 @@ import           Data.Aeson              (decode, parseJSON, withObject, (.:),
                                           (.=))
 import           Data.Aeson.Types        (FromJSON, Parser)
 import qualified Data.Map                as Map
+import           Data.Text               (pack)
 import           Data.Time.Clock         (UTCTime)
 import qualified Database.InfluxDB       as InfluxDB
 import qualified Database.InfluxDB.Types as InfluxDB.Types
@@ -47,12 +48,21 @@ someFunc = do
 
 
 writeData :: (AppConfig m, MonadIO m) => [Station] -> m ()
-writeData val = do
+writeData vals = do
   writeParams <- asks influxWp
-  let client = Map.singleton "client" $ InfluxDB.Types.Key $ "kurac"
 
-  liftIO $ InfluxDB.writeBatch writeParams
-    [ InfluxDB.Line "temperature" client
-      (Map.singleton "available" $ InfluxDB.FieldFloat $ 10)
-      (Nothing :: Maybe UTCTime)
-    ]
+  -- tags:   id (standNumber), geohash (geohash)
+  -- values: bikeStands, availableBikes, availableBikeStands
+  liftIO $ InfluxDB.writeBatch writeParams $ fmap
+     (\val -> InfluxDB.Line "bikes"
+       (Map.fromList
+        [ ("id",      InfluxDB.Types.Key . pack . show . standNumber $ val),
+          ("geohash", InfluxDB.Types.Key . pack . geohash $ val)
+        ])
+       (Map.fromList
+        [ ("stands",    InfluxDB.FieldInt . fromIntegral . bikeStands $ val)
+        , ("bikes",     InfluxDB.FieldInt . fromIntegral . availableBikes $ val)
+        , ("available", InfluxDB.FieldInt . fromIntegral . availableBikeStands $ val)
+        ])
+       (Nothing :: Maybe UTCTime) -- timestamp is present in station
+     ) vals
