@@ -21,6 +21,9 @@ import           Network.HTTP.Client
 import           Network.HTTP.Client.TLS
 import           Network.HTTP.Simple
 
+import           Control.Lens            ((&), (.~), (?~))
+import           Control.Monad.Reader    (runReaderT)
+
 
 getJson :: (MonadIO m, FromJSON a) => m a
 getJson = do
@@ -28,14 +31,15 @@ getJson = do
   let request'
         = setRequestMethod "GET"
           $ setRequestPath "/vls/v1/stations"
-          $ setRequestQueryString [ ("contract", Just "Dublin")
-                                  , ("apiKey", Just "a360b2a061d254a3a5891e4415511251899f6df1")
-                                  ]
+          $ setRequestQueryString
+          [ ("contract", Just "Dublin")
+          , ("apiKey", Just "a360b2a061d254a3a5891e4415511251899f6df1")
+          ]
           $ request
   response <- liftIO $ httpJSON request'
   return $ getResponseBody response
 
-getBikes :: IO [Station]
+getBikes :: (MonadIO m) => m [Station]
 getBikes = getJson
 
 someFunc :: IO ()
@@ -43,6 +47,11 @@ someFunc = do
   manager <- newManager tlsManagerSettings
 
   bikes <- getBikes
+  let wp = InfluxDB.writeParams (InfluxDB.Types.Database $ "bikes") & InfluxDB.precision .~ InfluxDB.Second
+  let appCfg = AppOptions wp ""
+
+  runReaderT (writeData bikes) appCfg
+
   putStrLn $ show bikes
 
 
