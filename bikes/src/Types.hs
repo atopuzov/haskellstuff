@@ -3,10 +3,12 @@
 
 module Types where
 
-import           Data.Aeson       (parseJSON, withObject, (.:), (.=))
-import           Data.Aeson.Types (FromJSON, Parser)
+import           Data.Aeson            (parseJSON, withObject, (.:), (.=))
+import           Data.Aeson.Types      (FromJSON, Parser)
 import qualified Data.Geohash
 import qualified Data.Maybe
+import           Data.Time             (UTCTime (..))
+import           Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 
 -- {"number":42,
 --  "contract_name":"Dublin",
@@ -26,7 +28,7 @@ data Station = Station {
   , bikeStands          :: Int
   , availableBikes      :: Int
   , availableBikeStands :: Int
-  , timestamp           :: Int
+  , timestamp           :: UTCTime
   -- , lat :: Double
   -- , lng :: Double
   , geohash             :: String
@@ -38,7 +40,7 @@ instance FromJSON Station where
     bikeStands          <- o .: "bike_stands"
     availableBikes      <- o .: "available_bikes"
     availableBikeStands <- o .: "available_bike_stands"
-    timestamp           <- o .: "last_update"
+    timestamp           <- fmap (posixSecondsToUTCTime . (/1000)) (o .: "last_update")
     position            <- o .: "position"
     lat                 <- position .: "lat" :: Parser Double
     lng                 <- position .: "lng" :: Parser Double

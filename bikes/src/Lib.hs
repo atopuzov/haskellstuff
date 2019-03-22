@@ -15,7 +15,6 @@ import           Data.Aeson              (decode, parseJSON, withObject, (.:),
 import           Data.Aeson.Types        (FromJSON, Parser)
 import qualified Data.Map                as Map
 import           Data.Text               (pack)
-import           Data.Time.Clock         (UTCTime)
 import qualified Database.InfluxDB       as InfluxDB
 import qualified Database.InfluxDB.Types as InfluxDB.Types
 import           Network.HTTP.Client
@@ -64,5 +63,5 @@ writeData vals = do
         , ("bikes",     InfluxDB.FieldInt . fromIntegral . availableBikes $ val)
         , ("available", InfluxDB.FieldInt . fromIntegral . availableBikeStands $ val)
         ])
-       (Nothing :: Maybe UTCTime) -- timestamp is present in station
+       (Just $ timestamp val)
      ) vals
