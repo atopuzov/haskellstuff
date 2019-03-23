@@ -1,18 +1,21 @@
 {-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Lib
-    ( someFunc
-    ) where
+module Lib where
 
 import           Config
 import           Types
 
+import qualified Control.Exception       as E
+import           Control.Monad.Except    (MonadError, MonadIO, throwError)
 import           Control.Monad.IO.Class  (MonadIO, liftIO)
 import           Control.Monad.Reader    (MonadReader, asks)
 import           Data.Aeson              (decode, parseJSON, withObject, (.:),
                                           (.=))
 import           Data.Aeson.Types        (FromJSON, Parser)
+import qualified Data.ByteString.Char8   as C
+
+
 import qualified Data.Map                as Map
 import           Data.Text               (pack)
 import qualified Database.InfluxDB       as InfluxDB
@@ -25,35 +28,22 @@ import           Control.Lens            ((&), (.~), (?~))
 import           Control.Monad.Reader    (runReaderT)
 
 
-getJson :: (MonadIO m, FromJSON a) => m a
-getJson = do
+getBikes :: (MonadIO m, AppConfig m) => m [Station]
+getBikes = do
   request <- liftIO $ parseRequest "https://api.jcdecaux.com"
+  apiK <- C.pack <$> asks apiKey
+
   let request'
         = setRequestMethod "GET"
           $ setRequestPath "/vls/v1/stations"
           $ setRequestQueryString
           [ ("contract", Just "Dublin")
-          , ("apiKey", Just "a360b2a061d254a3a5891e4415511251899f6df1")
+          , ("apiKey", Just apiK)
           ]
           $ request
+
   response <- liftIO $ httpJSON request'
   return $ getResponseBody response
-
-getBikes :: (MonadIO m) => m [Station]
-getBikes = getJson
-
-someFunc :: IO ()
-someFunc = do
-  manager <- newManager tlsManagerSettings
-
-  bikes <- getBikes
-  let wp = InfluxDB.writeParams (InfluxDB.Types.Database $ "bikes") & InfluxDB.precision .~ InfluxDB.Second
-  let appCfg = AppOptions wp ""
-
-  runReaderT (writeData bikes) appCfg
-
-  putStrLn $ show bikes
-
 
 writeData :: (AppConfig m, MonadIO m) => [Station] -> m ()
 writeData vals = do

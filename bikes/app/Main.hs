@@ -22,11 +22,13 @@ renderError (IOError e) = do
 
 main :: IO ()
 main = do
-  -- let wp = InfluxDB.writeParams (InfluxDB.Types.Database $ "bikes") & InfluxDB.precision .~ InfluxDB.Second
-  -- let appCfg = AppOptions wp ""
-  -- either renderError return =<< runExceptT (runReaderT (runApp app) appCfg)
-  someFunc
+  let wp = InfluxDB.writeParams (InfluxDB.Types.Database $ "bikes") & InfluxDB.precision .~ InfluxDB.Second
+  let appCfg = AppOptions wp "a360b2a061d254a3a5891e4415511251899f6df1"
+  either renderError return =<< runExceptT (runReaderT (runApp app) appCfg)
 
 app :: App ()
 app = do
+  bikes <- getBikes
+  liftIO $ putStrLn $ "Read " ++ show (length bikes) ++ " station information"
+  writeData bikes
   return ()

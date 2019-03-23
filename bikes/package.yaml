@@ -30,6 +30,7 @@ dependencies:
 - lens
 - time
 - text
+- bytestring
 - containers
 - geohash == 1.0.1
 

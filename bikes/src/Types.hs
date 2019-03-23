@@ -29,8 +29,6 @@ data Station = Station {
   , availableBikes      :: Int
   , availableBikeStands :: Int
   , timestamp           :: UTCTime
-  -- , lat :: Double
-  -- , lng :: Double
   , geohash             :: String
   } deriving Show
 
