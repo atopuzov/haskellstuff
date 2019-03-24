@@ -12,6 +12,7 @@ import qualified Database.InfluxDB      as InfluxDB
 data AppOptions = AppOptions {
     influxWp :: InfluxDB.WriteParams
   , apiKey   :: String
+  , contract :: String
 }
 
 type AppConfig = MonadReader AppOptions

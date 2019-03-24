@@ -28,16 +28,22 @@ import           Control.Lens            ((&), (.~), (?~))
 import           Control.Monad.Reader    (runReaderT)
 
 
+-- https://developer.jcdecaux.com/#/home
+-- https://developer.jcdecaux.com/#/opendata/vls?page=getstarted
+-- https://developer.jcdecaux.com/#/opendata/vls?page=static
+-- https://developer.jcdecaux.com/#/opendata/vls?page=dynamic
+
 getBikes :: (MonadIO m, AppConfig m) => m [Station]
 getBikes = do
   request <- liftIO $ parseRequest "https://api.jcdecaux.com"
   apiK <- C.pack <$> asks apiKey
+  con <- C.pack <$> asks contract
 
   let request'
         = setRequestMethod "GET"
           $ setRequestPath "/vls/v1/stations"
           $ setRequestQueryString
-          [ ("contract", Just "Dublin")
+          [ ("contract", Just con)
           , ("apiKey", Just apiK)
           ]
           $ request

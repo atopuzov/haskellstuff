@@ -23,7 +23,7 @@ renderError (IOError e) = do
 main :: IO ()
 main = do
   let wp = InfluxDB.writeParams (InfluxDB.Types.Database $ "bikes") & InfluxDB.precision .~ InfluxDB.Second
-  let appCfg = AppOptions wp "a360b2a061d254a3a5891e4415511251899f6df1"
+  let appCfg = AppOptions wp "a360b2a061d254a3a5891e4415511251899f6df1" "Dublin"
   either renderError return =<< runExceptT (runReaderT (runApp app) appCfg)
 
 app :: App ()
