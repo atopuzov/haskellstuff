@@ -4,6 +4,8 @@
  http://homepages.inf.ed.ac.uk/wadler/papers/marktoberdorf/baastad.pdf
 
  * 00 - original evaluator
+ * 01 - monadic context
+ * 02 - using `Identity`
  * 10 - evaluator with exception handling
  * 11 - exception handling custom monad
  * 12 - using `Either`

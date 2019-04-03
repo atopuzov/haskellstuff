@@ -12,8 +12,9 @@ eval (Con a) = do
 eval (Div t u) = do
   a <- eval t
   b <- eval u
-  x <- lift get
-  lift $ put (x + 1)
+  lift $ do
+    x <- get
+    put (x + 1)
   tell $ line (Div t u) (a `div` b)
   lift . lift $ if b == 0
                 then Left "divide by zero"

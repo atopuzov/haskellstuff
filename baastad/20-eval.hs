@@ -1,9 +1,9 @@
 import           Term
 
-type MS a = State -> (a, State)
+type M a = State -> (a, State)
 type State = Int
 
-eval :: Term -> MS Int
+eval :: Term -> M Int
 eval (Con a) x = (a, x)
 eval (Div t u) x =
   let (a, y) = eval t x
