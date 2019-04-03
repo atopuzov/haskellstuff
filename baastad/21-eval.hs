@@ -31,14 +31,16 @@ get = ST $ \s -> (s, s)
 put :: State -> M ()
 put s = ST $ \_ -> ((), s)
 
+tick :: M ()
+tick = get >>= \x -> put (x + 1)
+
 eval :: Term -> M Int
 eval (Con a) = do
   return a
 eval (Div t u) = do
   a <- eval t
   b <- eval u
-  x <- get
-  put (x + 1)
+  tick
   return (a `div` b)
 
 runOk = runM (eval Term.answer) 0

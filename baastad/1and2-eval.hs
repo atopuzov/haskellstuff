@@ -4,14 +4,16 @@ import Control.Monad.Trans.Writer (WriterT, tell, runWriterT)
 import Control.Monad.Trans.Class (lift)
 
 
+tick :: StateT Int (Either String) ()
+tick = get >>= \x -> put (x + 1)
+
 eval :: Term -> StateT Int (Either String) Int
 eval (Con a) = do
   return a
 eval (Div t u) = do
   a <- eval t
   b <- eval u
-  x <- get
-  put (x + 1)
+  tick
   lift $ if b == 0
          then Left "divide by zero"
          else Right (a `div` b)

@@ -5,6 +5,7 @@ import           Control.Monad.Trans.Class  (lift)
 import           Control.Monad.Trans.State  (StateT, get, put, runStateT)
 import           Control.Monad.Trans.Writer (WriterT, runWriterT, tell)
 
+tick = get >>= \x -> put (x + 1)
 
 eval :: Term -> WriterT Output (StateT Int (Either String)) Int
 eval (Con a) = do
@@ -12,9 +13,7 @@ eval (Con a) = do
 eval (Div t u) = do
   a <- eval t
   b <- eval u
-  lift $ do
-    x <- get
-    put (x + 1)
+  lift tick
   tell $ line (Div t u) (a `div` b)
   lift . lift $ if b == 0
                 then Left "divide by zero"
@@ -23,14 +22,15 @@ eval (Div t u) = do
 runOk =   runStateT (runWriterT (eval (Term.answer))) 0
 runFail = runStateT (runWriterT (eval (Term.error)))  0
 
+tick' = get >>= \x -> put (x + 1)
+
 eval' :: Term -> StateT Int (WriterT Output (Either String)) Int
 eval' (Con a) = do
-  return a
+  return  a
 eval' (Div t u) = do
   a <- eval' t
   b <- eval' u
-  x <- get
-  put (x + 1)
+  tick'
   lift . tell $ line (Div t u) (a `div` b)
   lift . lift $ if b == 0
                 then Left "divide by zero"
