@@ -9,16 +9,17 @@ instance Functor M where
   fmap _ (Raise s)  = Raise s
 
 instance Applicative M where
-  pure x = Return x
+  pure = Return
   (Return f) <*> (Return a) = Return (f a)
   _ <*> (Raise s) = Raise s
 
 instance Monad M where
-  return x = Return x
+  return = pure
   (Return a) >>= f = case f a of
     Return fa -> Return fa
     Raise s   -> Raise s
   (Raise s) >>= f = Raise s
+  fail = Raise
 
 eval :: Term -> M Int
 eval (Con a) = pure a
@@ -26,7 +27,7 @@ eval (Div t u) = do
   a <- eval t
   b <- eval u
   if b == 0
-    then Raise "divide by zero"
+    then fail "divide by zero"
     else return (a `div` b)
 
 runOk = eval Term.answer
