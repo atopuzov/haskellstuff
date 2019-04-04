@@ -3,11 +3,10 @@ import           Term
 import           Control.Monad.State (State, get, put, runState)
 
 tick :: State Int ()
-tick = get >>= \x -> put (x + 1)
+tick = get >>= put . (+1)
 
 eval :: Term -> State Int Int
-eval (Con a) = do
-  return a
+eval (Con a) = return a
 eval (Div t u) = do
   a <- eval t
   b <- eval u

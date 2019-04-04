@@ -32,11 +32,10 @@ put :: State -> M ()
 put s = ST $ \_ -> ((), s)
 
 tick :: M ()
-tick = get >>= \x -> put (x + 1)
+tick = get >>= put . (+1)
 
 eval :: Term -> M Int
-eval (Con a) = do
-  return a
+eval (Con a) = return a
 eval (Div t u) = do
   a <- eval t
   b <- eval u
