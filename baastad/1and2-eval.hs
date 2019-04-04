@@ -1,7 +1,7 @@
-import Term
-import Control.Monad.Trans.State (StateT, get, put, runStateT)
-import Control.Monad.Trans.Writer (WriterT, tell, runWriterT)
-import Control.Monad.Trans.Class (lift)
+import           Control.Monad.Trans.Class  (lift)
+import           Control.Monad.Trans.State  (StateT, get, put, runStateT)
+import           Control.Monad.Trans.Writer (WriterT, runWriterT, tell)
+import           Term
 
 
 tick :: StateT Int (Either String) ()
