@@ -5,7 +5,7 @@ import Control.Monad.Trans.Class (lift)
 
 
 tick :: StateT Int (Either String) ()
-tick = get >>= \x -> put (x + 1)
+tick = get >>= put . (+1)
 
 eval :: Term -> StateT Int (Either String) Int
 eval (Con a) = do
