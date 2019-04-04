@@ -5,16 +5,20 @@ data M a = Raise Exception
 type Exception = String
 
 instance Functor M where
+  -- fmap :: (a -> b) -> f a -> f b
   fmap f (Return a) = Return (f a)
   fmap _ (Raise s)  = Raise s
 
 instance Applicative M where
+  -- pure :: a -> f a
   pure = Return
+  -- (<*>) :: f (a -> b) -> f a -> f b
   (Return f) <*> (Return a) = Return (f a)
   _ <*> (Raise s) = Raise s
 
 instance Monad M where
   return = pure
+  -- (>>=) m a -> (a -> m b) -> m b
   (Return a) >>= f = case f a of
     Return fa -> Return fa
     Raise s   -> Raise s
