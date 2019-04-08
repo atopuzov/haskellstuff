@@ -1,7 +1,8 @@
+module Eval11 where
 import           Term
 
 data M a = Raise Exception
-  | Return a deriving Show
+  | Return a deriving (Show, Eq)
 type Exception = String
 
 instance Functor M where

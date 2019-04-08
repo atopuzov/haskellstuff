@@ -1,6 +1,7 @@
+module Eval01 where
 import           Term
 
-data M a = I a
+data M a = I a deriving (Show, Eq)
 
 runI :: M a -> a
 runI (I a) = a

@@ -1,3 +1,4 @@
+module Eval12 where
 import           Term
 
 eval :: Term -> Either String Int

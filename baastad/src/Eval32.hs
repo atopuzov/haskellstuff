@@ -1,7 +1,8 @@
+module Eval32 where
 import           Line
 import           Term
 
-import           Control.Monad.Trans.Writer (Writer, runWriter, tell)
+import           Control.Monad.Writer (Writer, runWriter, tell)
 
 
 eval :: Term -> Writer Output Int
