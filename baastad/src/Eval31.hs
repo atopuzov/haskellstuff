@@ -2,7 +2,7 @@ module Eval31 where
 import           Line
 import           Term
 
-data M a = M (Output, a) deriving Show
+data M a = M (Output, a) deriving (Show, Eq)
 
 runM :: M a -> (String, a)
 runM (M x) = x
