@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+module Eval1and2and3 where
 import           Line
 import           Term
 
@@ -6,14 +7,10 @@ import           Control.Monad.Trans.Class  (lift)
 import           Control.Monad.Trans.State  (StateT, get, put, runStateT)
 import           Control.Monad.Trans.Writer (WriterT, runWriterT, tell)
 
-import           Control.Monad.Trans.State  (StateT, runStateT)
-import           Control.Monad.Trans.Writer (WriterT, runWriterT)
-
 import           Control.Monad.Except       (MonadError, throwError)
 import qualified Control.Monad.State        as MS (MonadState, get, put)
 import qualified Control.Monad.Writer       as MW (MonadWriter, tell)
 
-import           Data.Functor.Identity
 
 
 tick = get >>= put . (+1)
