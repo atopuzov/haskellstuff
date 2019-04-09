@@ -3,7 +3,7 @@ import qualified Test02
 import qualified Test11
 import qualified Test12
 -- import qualified Test21
--- import qualified Test22
+import qualified Test22
 import qualified Test31
 import qualified Test32
 
@@ -19,7 +19,7 @@ main = do
 
   putStrLn "State"
   -- Test21.testMonad
-  -- Test22.testMonad
+  Test22.testMonad
 
   putStrLn "Writer"
   Test31.testMonad
