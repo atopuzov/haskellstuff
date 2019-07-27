@@ -2,23 +2,25 @@ module Ver3
 where
 
 import Data.Semigroup (Min(..), Max(..), Sum(..), getMin, getMax, getSum, Semigroup, (<>))
-import Data.Semigroup.Foldable (foldMap1)
-import Data.List.NonEmpty (NonEmpty((:|)))
 
-data MinMax a = MinMax (Min a) (Max a) deriving Show
+data MinMax a = MinMax {
+    myMin :: Min a
+  , myMax :: Max a
+  } deriving Show
 
 instance Ord a => Semigroup (MinMax a) where
-  MinMax a b <> MinMax c d = MinMax (a <> c) (b <> d)
+  a <> b = MinMax (myMin a <> myMin b) (myMax a <> myMax b)
 
 mkMinMax :: (Num a, Ord a) => a -> MinMax a
 mkMinMax x = MinMax (Min x) (Max x)
 
+calcDiff :: Num a => MinMax a -> a
+calcDiff x = (getMax . myMax $ x) - (getMin . myMin $ x)
+
 rowCksum :: (Num a, Ord a) => [a] -> Maybe (Sum a)
-rowCksum [] = Nothing
-rowCksum (x:xs) = Just . Sum $ (getMax b) - (getMin a)
+rowCksum xs = fmap (Sum . calcDiff) res
   where
-    MinMax a b = foldMap1 mkMinMax (x :| xs)
+    res = foldMap (Just . mkMinMax) xs
 
 cksum :: (Num a, Ord a) => [[a]] -> Maybe a
-cksum [] = Nothing
-cksum (x:xs)= fmap getSum $ foldMap1 (rowCksum) (x :| xs)
+cksum xs = fmap getSum $ foldMap (rowCksum) xs

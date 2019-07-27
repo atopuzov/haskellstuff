@@ -21,7 +21,6 @@ description:         Nothing to see here
 
 dependencies:
 - base >= 4.7 && < 5
-- semigroupoids
 
 library:
   source-dirs: src
