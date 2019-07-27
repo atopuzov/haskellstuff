@@ -3,6 +3,7 @@ module Main where
 import qualified Ver1
 import qualified Ver2
 import qualified Ver3
+import qualified Ver4
 
 main :: IO ()
 main = do
@@ -12,3 +13,4 @@ main = do
   putStrLn $ show $ Ver2.cksum sh
   putStrLn $ show $ Ver2.cksum' sh
   putStrLn $ show $ Ver3.cksum sh
+  putStrLn $ show $ Ver4.cksum sh
