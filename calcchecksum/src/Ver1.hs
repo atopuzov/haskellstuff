@@ -9,8 +9,7 @@ rowCksum xs = rmax - rmin
     rmax = maximum xs
 
 cksum :: (Num a, Ord a) => [[a]] -> a
-cksum xs = sum $ map rowCksum xs
-
+cksum = sum . map rowCksum
 
 rowCksum' :: (Num a, Ord a) => [a] -> Maybe a
 rowCksum' [] = Nothing
