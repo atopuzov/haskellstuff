@@ -41,8 +41,19 @@ sol8 = maximum . map ((foldl max d) . map (foldl (+) e) . tails') . inits'
 -- S = Max, max,  d = -Infinity
 -- T = Sum, plus, d = 0
 
--- o x y = (max x d) + y ???
--- sol9 = maximum . map (foldr o d) . inits' ???
+-- o x y = (max x d) + y
+-- sol9 = maximum . map (foldr o d . tails') . inits'
+final = maximum . scanr h 0
+  where h x y = 0 `max` (x + y)
+
+sol9 = maximum . map (maximum . map sum . inits') . tails'
+
+-- map sum . inits' = scanl (+) 0
+sol10 = maximum . map (maximum . scanl (+) 0) . tails'
+
+-- maximum = foldr1 max
+sol11 = foldr1 max . map (foldr1 max . scanl (+) 0) .tails'
+
 
 main :: IO ()
 main = someFunc
