@@ -19,7 +19,10 @@ run:
 ghci:
 	stack ghci
 
-result: $(SOURCES)
+bikes.nix: package.yaml
+	cabal2nix . > bikes.nix
+
+result: $(SOURCES) bikes.nix default.nix
 	nix-build
 
 .PHONY: deploy

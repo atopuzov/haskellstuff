@@ -1,7 +1,4 @@
-{ pkgs ? import <nixpkgs> {}
+{ pkgs ? import <nixpkgs> {}, compiler ? "ghc865"
 }:
 
-let
-  stack-pkgs = pkgs.callPackage ./nix {};
-in
-  stack-pkgs.bikes
+pkgs.pkgs.haskell.packages.${compiler}.callPackage ./bikes.nix { }
