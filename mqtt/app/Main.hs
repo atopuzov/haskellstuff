@@ -41,19 +41,19 @@ import           System.IO                (BufferMode (NoBuffering), hPutStrLn,
                                            hSetBuffering, stderr, stdout)
 
 data CliOptions = CliOptions {
-    _mqttHost       :: String
-  , _mqttPort       :: String
-  , _mqttUsername   :: Text
-  , _mqttPassword   :: Text
-  , _mqttTopic      :: Text
-  , _influxHost     :: Text
-  , _influxDatabase :: Text
+    _mqttHost       :: !String
+  , _mqttPort       :: !String
+  , _mqttUsername   :: !Text
+  , _mqttPassword   :: !Text
+  , _mqttTopic      :: !Text
+  , _influxHost     :: !Text
+  , _influxDatabase :: !Text
   }
 
 data AppOptions = AppOptions {
-    mqttConfig  :: MQTT.Config
-  , mqttTopic   :: MQTT.Types.Topic
-  , influxWp    :: InfluxDB.WriteParams
+    mqttConfig  :: !MQTT.Config
+  , mqttTopic   :: !MQTT.Types.Topic
+  , influxWp    :: !InfluxDB.WriteParams
   }
 
 type AppConfig = MonadReader AppOptions
@@ -65,9 +65,9 @@ newtype App a = App {
   } deriving (Functor, Applicative, Monad, AppConfig, MonadIO, MonadError AppError)
 
 data Measurement = SHT30 {
-    mTemperature :: Double
-  , mHumidity    :: Double
-  , mClientID    :: Text
+    mTemperature :: !Double
+  , mHumidity    :: !Double
+  , mClientID    :: !Text
 } deriving Show
 
 instance FromJSON Measurement where
