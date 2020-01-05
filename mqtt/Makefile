@@ -19,7 +19,10 @@ run:
 ghci:
 	stack ghci
 
-result: $(SOURCES)
+mqtt.nix: package.yaml
+	cabal2nix . > mqtt.nix
+
+result: $(SOURCES) mqtt.nix default.nix
 	nix-build
 
 .PHONY: deploy
