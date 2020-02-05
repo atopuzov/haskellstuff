@@ -4,11 +4,13 @@ let
   overrides = {
     overrides = self: super: {
       mqtt-hs = pkgs.haskell.lib.overrideCabal super.mqtt-hs (drv: {
+        libraryHaskellDepends = drv.libraryHaskellDepends ++
+                                [ pkgs.haskell.packages."${compiler}".connection ];
         src = pkgs.fetchFromGitHub {
           owner = "atopuzov";
           repo = "mqtt-hs";
-          rev = "5eb90ddbbddf14c6a02e5a2257a058a8c36b3731";
-          sha256 = "0c1c3mjsh36cpsyg4hisqzhxd3sglidmnmizqjg19swzp5kwf7p8";
+          rev = "fb0400aae07224c9a957404e8290a213641c2b62";
+          sha256 = "1zr76994654h9zffn57wrq8ijfnv0ix7pyrq617yv9sgdr4rvmq3";
         };
         broken = false;
       });

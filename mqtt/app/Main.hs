@@ -147,6 +147,7 @@ main = do
   let mqttConfig = (MQTT.defaultConfig cmds chan) {
           MQTT.cHost      = _mqttHost opts
         , MQTT.cPort      = read $ _mqttPort opts
+        , MQTT.cTLS       = True
         , MQTT.cClientID  = UUID.toText $ fromJust clientId
         , MQTT.cKeepAlive = Just 10
         , MQTT.cUsername  = Just $ _mqttUsername opts
