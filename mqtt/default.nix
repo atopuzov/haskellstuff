@@ -9,8 +9,8 @@ let
         src = pkgs.fetchFromGitHub {
           owner = "atopuzov";
           repo = "mqtt-hs";
-          rev = "fb0400aae07224c9a957404e8290a213641c2b62";
-          sha256 = "1zr76994654h9zffn57wrq8ijfnv0ix7pyrq617yv9sgdr4rvmq3";
+          rev = "e6d99d19d84b636775adb28e312a0ef8e2481896";
+          sha256 = "1cglyp55jxlq87k32apkyfbz4farrlw7qxp5w905ql4ss3gffv1d";
         };
         broken = false;
       });

@@ -40,6 +40,8 @@ import           System.Exit              (exitFailure)
 import           System.IO                (BufferMode (NoBuffering), hPutStrLn,
                                            hSetBuffering, stderr, stdout)
 
+import qualified Network.Connection as NC
+
 data CliOptions = CliOptions {
     _mqttHost       :: !String
   , _mqttPort       :: !String
@@ -147,7 +149,11 @@ main = do
   let mqttConfig = (MQTT.defaultConfig cmds chan) {
           MQTT.cHost      = _mqttHost opts
         , MQTT.cPort      = read $ _mqttPort opts
-        , MQTT.cTLS       = True
+        , MQTT.cTLS       = Just NC.TLSSettingsSimple
+                            { settingDisableCertificateValidation = False
+                            , settingDisableSession = False
+                            , settingUseServerName = False
+                            }
         , MQTT.cClientID  = UUID.toText $ fromJust clientId
         , MQTT.cKeepAlive = Just 10
         , MQTT.cUsername  = Just $ _mqttUsername opts

@@ -33,6 +33,7 @@ dependencies:
 - mtl
 - uuid
 - optparse-applicative
+- connection
 
 library:
   source-dirs: src
