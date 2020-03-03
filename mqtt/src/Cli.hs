@@ -1,10 +1,13 @@
-{-# LANGUAGE ApplicativeDo              #-}
-{-# LANGUAGE RecordWildCards            #-}
-{-# LANGUAGE OverloadedStrings          #-}
-module Cli where
+{-# LANGUAGE ApplicativeDo     #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards   #-}
 
-import Types
-import qualified Options.Applicative      as OA
+module Cli (
+  cliParserInfo
+  ) where
+
+import qualified Options.Applicative as OA
+import           Types               (CliOptions (..))
 
 
 cliParser :: OA.Parser CliOptions

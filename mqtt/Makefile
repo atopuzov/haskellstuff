@@ -4,8 +4,7 @@ rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst 
 SOURCES = $(call rwildcard, , *.hs)
 
 .PHONY: all
-all:
-	@echo "Mqtt sources:" $(SOURCES)
+all: build;
 
 .PHONY: build
 build: mqtt.cabal
@@ -22,7 +21,7 @@ ghci: mqtt.cabal
 mqtt.cabal: package.yaml
 	hpack
 
-mqtt.nix: package.yaml
+mqtt.nix: mqtt.cabal
 	cabal2nix . > mqtt.nix
 
 result: $(SOURCES) mqtt.nix default.nix

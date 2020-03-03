@@ -3,7 +3,14 @@
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE RecordWildCards            #-}
 
-module Types where
+module Types (
+  CliOptions(..)
+  , AppOptions(..)
+  , AppError(..)
+  , AppConfig(..)
+  , Measurement(..)
+  , App(..)
+  ) where
 
 import           Control.Monad.Except    (ExceptT, MonadError)
 import           Control.Monad.IO.Class  (MonadIO)
