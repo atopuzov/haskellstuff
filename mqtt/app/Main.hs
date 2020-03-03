@@ -10,6 +10,8 @@
 module Main where
 
 import           Lib
+import           Types
+import           Cli
 
 import           Control.Concurrent       (forkIO)
 import           Control.Concurrent.Async (async)
@@ -42,42 +44,6 @@ import           System.IO                (BufferMode (NoBuffering), hPutStrLn,
 
 import qualified Network.Connection as NC
 
-data CliOptions = CliOptions {
-    _mqttHost       :: !String
-  , _mqttPort       :: !String
-  , _mqttUsername   :: !Text
-  , _mqttPassword   :: !Text
-  , _mqttTopic      :: !Text
-  , _influxHost     :: !Text
-  , _influxDatabase :: !Text
-  }
-
-data AppOptions = AppOptions {
-    mqttConfig  :: !MQTT.Config
-  , mqttTopic   :: !MQTT.Types.Topic
-  , influxWp    :: !InfluxDB.WriteParams
-  }
-
-type AppConfig = MonadReader AppOptions
-
-data AppError = IOError E.IOException
-
-newtype App a = App {
-  runApp :: ReaderT AppOptions (ExceptT AppError IO) a
-  } deriving (Functor, Applicative, Monad, AppConfig, MonadIO, MonadError AppError)
-
-data Measurement = SHT30 {
-    mTemperature :: !Double
-  , mHumidity    :: !Double
-  , mClientID    :: !Text
-} deriving Show
-
-instance FromJSON Measurement where
-  parseJSON = withObject "Measurement" $ \o -> do
-    mTemperature <- o .: "temperature"
-    mHumidity    <- o .: "humidity"
-    mClientID    <- o .: "client"
-    return SHT30{..}
 
 -- Write data to InfluxDB
 writeData :: (AppConfig m, MonadIO m) => Measurement -> m ()
@@ -103,39 +69,6 @@ renderError (IOError e) = do
     putStrLn "There was an error:"
     putStrLn $ "  " ++ show e
 
-cliParser :: OA.Parser CliOptions
-cliParser = do
-  _mqttHost <- OA.option OA.str $
-    OA.long "mqtt-host" <>
-    OA.value "localhost" <>
-    OA.help "MQTT host to connect to"
-  _mqttPort <- OA.option OA.str $
-    OA.long "mqtt-port" <>
-    OA.value "1883" <>
-    OA.help "MQTT port to connect to"
-  _mqttUsername <- OA.option OA.str $
-    OA.long "mqtt-username" <>
-    OA.short 'u' <>
-    OA.help "MQTT username"
-  _mqttPassword <- OA.option OA.str $
-    OA.long "mqtt-password" <>
-    OA.short 'p' <>
-    OA.help "MQTT password"
-  _mqttTopic <- OA.option OA.str $
-    OA.long "mqtt-topic" <>
-    OA.value "outTopic" <>
-    OA.help "MQTT topic"
-  _influxHost <- OA.option OA.str $
-    OA.long "influx-host" <>
-    OA.value "localhost" <>
-    OA.help "InfluxDB host to connect to"
-  _influxDatabase <- OA.option OA.str $
-    OA.long "influx-db" <>
-    OA.value "temperature" <> OA.help "InfluxDB database"
-  pure CliOptions {..}
-
-cliParserInfo :: OA.ParserInfo CliOptions
-cliParserInfo = OA.info (OA.helper <*> cliParser) mempty
 
 main :: IO ()
 main = do

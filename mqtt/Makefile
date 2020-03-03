@@ -8,16 +8,19 @@ all:
 	@echo "Mqtt sources:" $(SOURCES)
 
 .PHONY: build
-build:
-	stack build
+build: mqtt.cabal
+	cabal new-build
 
 .PHONY: run
-run:
-	stack run
+run: mqtt.cabal
+	cabal new-run
 
 .PHONY: ghci
-ghci:
-	stack ghci
+ghci: mqtt.cabal
+	cabal new-repl
+
+mqtt.cabal: package.yaml
+	hpack
 
 mqtt.nix: package.yaml
 	cabal2nix . > mqtt.nix
