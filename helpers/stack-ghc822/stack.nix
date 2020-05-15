@@ -1,7 +1,7 @@
 # You may need to manually run `unset STACK_IN_NIX_SHELL`
 # (doesn't work from a `shellHook`; see: https://github.com/commercialhaskell/stack/issues/5000
 
-with import <nixos> {};
+with import <nixpkgs> {};
 let
   nurSrc = builtins.fetchTarball {
     # Get the revision by choosing a version from https://github.com/nix-community/NUR/commits/master
