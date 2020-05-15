@@ -4,4 +4,4 @@ packages:
 
 nix:
   enable: true
-  shell-file: stack-shell.nix
+  shell-file: ./stack.nix
