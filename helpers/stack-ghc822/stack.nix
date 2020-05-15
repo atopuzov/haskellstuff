@@ -23,9 +23,9 @@ haskell.lib.buildStackProject {
   name = "stack-nix-shell";
 
   # System dependencies used at build-time go in here.
-  buildInputs = [ zlib ];
+  nativeBuildInputs = [ ];
   # System dependencies used at run-time go in here.
-  buildInputs = [ ];
+  buildInputs = [ zlib ];
 
   src = if lib.inNixShell then null else ./.;
 }
