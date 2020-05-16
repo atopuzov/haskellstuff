@@ -1,6 +1,11 @@
 # You may need to manually run `unset STACK_IN_NIX_SHELL`
 # (doesn't work from a `shellHook`; see: https://github.com/commercialhaskell/stack/issues/5000
 
+# With pinning to last commit with ghc822
+# with import (
+#   fetchTarball "https://github.com/nixos/nixpkgs/archive/c0b652d6cd82947443ef5b091e8d1b09799ec769.tar.gz"
+# ) {};
+
 with import <nixpkgs> {};
 let
   nurSrc = builtins.fetchTarball {
