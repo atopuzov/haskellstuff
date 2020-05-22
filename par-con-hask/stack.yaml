@@ -1,0 +1,7 @@
+resolver: lts-11.22
+packages:
+- .
+
+nix:
+  enable: true
+  shell-file: ./stack.nix
