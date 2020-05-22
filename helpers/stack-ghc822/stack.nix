@@ -1,26 +1,17 @@
 # You may need to manually run `unset STACK_IN_NIX_SHELL`
 # (doesn't work from a `shellHook`; see: https://github.com/commercialhaskell/stack/issues/5000
 
-# With pinning to last commit with ghc822
-# with import (
-#   fetchTarball "https://github.com/nixos/nixpkgs/archive/c0b652d6cd82947443ef5b091e8d1b09799ec769.tar.gz"
-# ) {};
-
 with import <nixpkgs> {};
 let
-  nurSrc = builtins.fetchTarball {
-    # Get the revision by choosing a version from https://github.com/nix-community/NUR/commits/master
-    url = "https://github.com/nix-community/NUR/archive/4178c02f17191018b491dde88217138665aa030d.tar.gz";
-    # Get the hash by running `nix-prefetch-url --unpack <url>` on the above url
-    sha256 = "1niwm6mrcgn5ka9xmjv48qv418w1ds5mwib7nqa8ania7wc8rvp0";
+  oldGhcSrc = builtins.fetchGit {
+    url = "https://github.com/mpickering/old-ghc-nix";
+    rev = "674d459c7376af6641c94e91cd7d36214661b481";
+    ref = "master";
   };
 
-  nur = import nurSrc {
-    inherit pkgs;
-  };
+  oldGhc = import oldGhcSrc { inherit pkgs; };
 
-  ghc = nur.repos.mpickering.ghc.ghc822;
-
+  ghc = oldGhc.ghc822;
 in
 
 haskell.lib.buildStackProject {
