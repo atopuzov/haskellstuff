@@ -42,5 +42,5 @@ eval (Div t u) = do
   return $ a `div` b
 
 runOk = runM (eval Term.answer)
-printAnswer = putStrLn . show . snd $ runOk
+printAnswer = print . snd $ runOk
 printLog = putStr . fst $ runOk
