@@ -17,7 +17,7 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: lts-14.19
+resolver: lts-14.27
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -39,8 +39,8 @@ packages:
 # (e.g., acme-missiles-0.3)
 
 extra-deps:
-  - git: https://github.com/atopuzov/mqtt-hs.git
-    commit: 5eb90ddbbddf14c6a02e5a2257a058a8c36b3731
+- git: git@github.com:atopuzov/mqtt-hs.git
+  commit: e6d99d19d84b636775adb28e312a0ef8e2481896
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
