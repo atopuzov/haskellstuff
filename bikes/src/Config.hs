@@ -9,11 +9,11 @@ import           Control.Monad.IO.Class (MonadIO)
 import           Control.Monad.Reader   (MonadReader, ReaderT)
 import qualified Database.InfluxDB      as InfluxDB
 
-data AppOptions = AppOptions {
-    influxWp :: InfluxDB.WriteParams
-  , apiKey   :: String
-  , contract :: String
-}
+data AppOptions = AppOptions
+    { influxWp :: InfluxDB.WriteParams
+    , apiKey   :: String
+    , contract :: String
+    }
 
 type AppConfig = MonadReader AppOptions
 
