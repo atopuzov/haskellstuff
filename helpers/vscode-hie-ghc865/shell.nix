@@ -1,7 +1,6 @@
-# Nixpkgs is pinned to the same version as all-hies for ghc865
-{ nixpkgs ? (import ./nixpkgs.nix) }:
 let
-  pkgs = import nixpkgs {};
+  oldPkgs = import (import ./nixpkgs.nix) {}; # Nixpkgs is pinned to the same version as all-hies for ghc865
+  pkgs = import <nixpkgs> {};
 
   # Haskell IDE engine
   allHiesSrc = builtins.fetchGit {
@@ -9,43 +8,48 @@ let
     rev = "4b6aab017cdf96a90641dc287437685675d598da";
     ref = "master";
   };
-  allHies = import allHiesSrc { inherit pkgs; };
+  allHies = import allHiesSrc { pkgs = oldPkgs; };
 
   hie = allHies.selection { selector = p: { inherit (p) ghc865; }; };
 
-  # GHC with tools and packges
-  haskell = pkgs.haskell.packages.ghc865.ghcWithPackages (pkgs: with pkgs; [
+  stack = pkgs.stdenv.mkDerivation {
+    name = "stack-system-ghc";
+    builder = pkgs.writeScript "stack" ''
+      source $stdenv/setup
+      mkdir -p $out/bin
+      makeWrapper ${pkgs.stack}/bin/stack \
+        $out/bin/stack \
+        --add-flags "--system-ghc --no-nix --no-docker"
+    '';
+    buildInputs = [ pkgs.makeWrapper ];
+  };
 
+  # GHC with tools and packges
+  haskell = oldPkgs.haskell.packages.ghc865.ghcWithPackages (pkgs: with pkgs; [
     # language tools
     stylish-haskell
     hindent
     hlint
     hoogle
     cabal-install
-    stack
   ]);
 
   # Visual studio code
   vscode = pkgs.vscode.overrideDerivation (old: rec {
-    version = "1.45.0";
-    name = "vscode-${version}";
-    src = pkgs.fetchurl rec {
-      name = "VSCode_${version}_linux-x64.tar.gz";
-      url = "https://vscode-update.azurewebsites.net/${version}/linux-x64/stable";
-      sha256 = "16zchjp72m6n6za4ak5kn2ax1s5pjfn7l082d6gfbb2y62isvs7q";
-    };
     postFixup = ''
       wrapProgram \
         $out/bin/code \
-        --prefix PATH : ${pkgs.lib.makeBinPath [haskell hie]}
-      '';
+        --prefix PATH : ${pkgs.lib.makeBinPath [haskell hie stack]}
+    '';
   });
 in
 pkgs.mkShell {
   buildInputs = [
     haskell
+    stack
     hie
     vscode
+    pkgs.zlib
   ];
 
   shellHook = ''
