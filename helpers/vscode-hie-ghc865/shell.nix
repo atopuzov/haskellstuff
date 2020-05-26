@@ -1,14 +1,14 @@
 let
-  oldPkgs = import (import ./nixpkgs.nix) {}; # Nixpkgs is pinned to the same version as all-hies for ghc865
-  pkgs = import <nixpkgs> {};
+  pkgs = import (import ./nixpkgs.nix) {};
 
   # Haskell IDE engine
   allHiesSrc = builtins.fetchGit {
-    url = "https://github.com/Infinisil/all-hies/";
-    rev = "4b6aab017cdf96a90641dc287437685675d598da";
-    ref = "master";
+    url = "https://github.com/atopuzov/all-hies/";
+    rev = "f8249043a53f0f8e5f5415c0b47a28e00fcf5558";
+    ref = "nixos-20.03";
   };
-  allHies = import allHiesSrc { pkgs = oldPkgs; };
+
+  allHies = import allHiesSrc { inherit pkgs; };
 
   hie = allHies.selection { selector = p: { inherit (p) ghc865; }; };
 
@@ -25,7 +25,7 @@ let
   };
 
   # GHC with tools and packges
-  haskell = oldPkgs.haskell.packages.ghc865.ghcWithPackages (pkgs: with pkgs; [
+  haskell = pkgs.haskell.packages.ghc865.ghcWithPackages (pkgs: with pkgs; [
     # language tools
     stylish-haskell
     hindent
