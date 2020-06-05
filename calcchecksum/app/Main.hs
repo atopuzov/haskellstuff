@@ -4,13 +4,26 @@ import qualified Ver1
 import qualified Ver2
 import qualified Ver3
 import qualified Ver4
+import qualified Ver5
+
+example :: [[Int]]
+example = [[5, 1, 9, 5], [7, 5, 3], [2, 4, 6, 8]]
 
 main :: IO ()
 main = do
-  let sh = [[1,2,4,5], [6,8,2], [5,6,7]]
-  putStrLn $ show $ Ver1.cksum sh
-  putStrLn $ show $ Ver1.cksum' sh
-  putStrLn $ show $ Ver2.cksum sh
-  putStrLn $ show $ Ver2.cksum' sh
-  putStrLn $ show $ Ver3.cksum sh
-  putStrLn $ show $ Ver4.cksum sh
+  putStrLn "Version 1:"
+  putStrLn $ show $ Ver1.cksum example
+  putStrLn $ show $ Ver1.cksum' example
+
+  putStrLn "Version 2:"
+  putStrLn $ show $ Ver2.cksum example
+  putStrLn $ show $ Ver2.cksum' example
+
+  putStrLn "Version 3:"
+  putStrLn $ show $ Ver3.cksum example
+
+  putStrLn "Version 4:"
+  putStrLn $ show $ Ver4.cksum example
+
+  putStrLn "Version 5:"
+  putStrLn $ show $ Ver5.cksum example
