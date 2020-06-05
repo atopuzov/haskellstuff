@@ -1,18 +1,18 @@
-{-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Main where
 
-import           Lib
 import           Config
+import           Lib
 
 import           Control.Lens             ((&), (.~), (?~))
-import           Control.Monad.Except   (runExceptT)
-import           Control.Monad.Reader   (runReaderT)
+import           Control.Monad.Except    (runExceptT)
+import           Control.Monad.Reader    (runReaderT)
 
-import qualified Database.InfluxDB      as InfluxDB
-import qualified Database.InfluxDB.Types  as InfluxDB.Types
+import qualified Database.InfluxDB       as InfluxDB
+import qualified Database.InfluxDB.Types as InfluxDB.Types
 
-import           Control.Monad.IO.Class   (MonadIO, liftIO)
+import           Control.Monad.IO.Class  (MonadIO, liftIO)
 
 
 renderError :: AppError -> IO ()

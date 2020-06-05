@@ -23,14 +23,15 @@ import           Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 --  "status":"OPEN",
 --  "last_update":1552330831000},
 
-data Station = Station {
-    standNumber         :: Int
-  , bikeStands          :: Int
-  , availableBikes      :: Int
-  , availableBikeStands :: Int
-  , timestamp           :: UTCTime
-  , geohash             :: String
-  } deriving Show
+data Station = Station
+    { standNumber         :: Int
+    , bikeStands          :: Int
+    , availableBikes      :: Int
+    , availableBikeStands :: Int
+    , timestamp           :: UTCTime
+    , geohash             :: String
+    }
+    deriving Show
 
 instance FromJSON Station where
   parseJSON = withObject "Station" $ \o -> do
