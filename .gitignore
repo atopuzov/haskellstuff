@@ -1,0 +1,4 @@
+result
+.direnv
+stack.yaml.lock
+dist-newstyle
