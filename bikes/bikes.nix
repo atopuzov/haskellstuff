@@ -22,6 +22,6 @@ mkDerivation {
     http-client-tls http-conduit influxdb lens mtl text time
   ];
   prePatch = "hpack";
-  homepage = "https://github.com/atopuzov/bikes#readme";
+  homepage = "https://github.com/atopuzov/haskellstuff#readme";
   license = stdenv.lib.licenses.bsd3;
 }

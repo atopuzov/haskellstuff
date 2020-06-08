@@ -1,4 +1,10 @@
-{ pkgs ? import <nixpkgs> {}, compiler ? "ghc865"
+{
+  ghcVersion ? "ghc865"
 }:
-
-pkgs.pkgs.haskell.packages.${compiler}.callPackage ./bikes.nix { }
+let
+  nixpkgs = import ./nixpkgs.nix;
+  pkgs = import nixpkgs {};
+  compiler = pkgs.pkgs.haskell.packages.${ghcVersion};
+  drv = compiler.callPackage ./bikes.nix { };
+in
+drv

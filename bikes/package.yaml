@@ -1,6 +1,6 @@
 name:                bikes
 version:             0.1.0.0
-github:              "atopuzov/bikes"
+github:              "atopuzov/haskellstuff/bikes"
 license:             BSD3
 author:              "Aleksandar Topuzovic"
 maintainer:          "aleksandar.topuzovic@gmail.com"
@@ -17,7 +17,7 @@ extra-source-files:
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/atopuzov/bikes#readme>
+description:         Please see the README on GitHub at <https://github.com/atopuzov/haskellstuff/bikes#readme>
 
 dependencies:
 - base >= 4.7 && < 5

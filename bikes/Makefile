@@ -2,24 +2,28 @@
 
 rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
 SOURCES = $(call rwildcard, , *.hs)
+PROJECT_CABAL=bikes.cabal
 
 .PHONY: all
 all:
 	@echo "Sources:" $(SOURCES)
 
 .PHONY: build
-build:
-	stack build
+build: ${PROJECT_CABAL}
+	cabal new-build
 
 .PHONY: run
-run:
-	stack run
+run: mqtt.cabal
+	cabal new-run
 
 .PHONY: ghci
-ghci:
-	stack ghci
+ghci: ${PROJECT_CABAL}
+	cabal new-repl
 
-bikes.nix: package.yaml
+bikes.cabal: package.yaml
+	hpack
+
+bikes.nix: ${PROJECT_CABAL}
 	cabal2nix . > bikes.nix
 
 result: $(SOURCES) bikes.nix default.nix
