@@ -1,10 +1,11 @@
 name:                myls
 version:             0.1.0.0
-github:              "githubuser/myls"
+github:              "atopuzov/haskellstuff/myls"
 license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2019 Author name here"
+author:              "Aleksandar Topuzovic"
+maintainer:          "aleksandar.topuzovic@gmail.com"
+copyright:           "2019 Aleksandar Topuzovic"
+
 
 extra-source-files:
 - README.md
@@ -17,7 +18,7 @@ extra-source-files:
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/githubuser/myls#readme>
+description:         Please see the README on GitHub at <https://github.com/haskellstuff/myls#readme>
 
 dependencies:
 - base >= 4.7 && < 5
@@ -39,7 +40,7 @@ executables:
     - optparse-applicative
     - ansi-terminal
     - mtl
-    
+
 tests:
   myls-test:
     main:                Spec.hs
