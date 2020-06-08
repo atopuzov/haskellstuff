@@ -1,11 +1,15 @@
-{ pkgs ? import <nixpkgs> {}, compiler ? "ghc865"
+{
+  ghcVersion ? "ghc865"
 }:
 let
+  nixpkgs = import ./nixpkgs.nix;
+  pkgs = import nixpkgs {};
+
   overrides = {
     overrides = self: super: {
       mqtt-hs = pkgs.haskell.lib.overrideCabal super.mqtt-hs (drv: {
         libraryHaskellDepends = drv.libraryHaskellDepends ++
-                                [ pkgs.haskell.packages."${compiler}".connection ];
+                                [ pkgs.haskell.packages."${ghcVersion}".connection ];
         src = pkgs.fetchFromGitHub {
           owner = "atopuzov";
           repo = "mqtt-hs";
@@ -16,7 +20,7 @@ let
       });
     };
   };
-  haskellPackages = pkgs.haskell.packages.${compiler}.override overrides;
-  drv = haskellPackages.callPackage ./mqtt.nix { };
+  compiler = pkgs.pkgs.haskell.packages.${ghcVersion}.override overrides;
+  drv = compiler.callPackage ./mqtt.nix { };
 in
-if pkgs.lib.inNixShell then drv.env else drv
+drv
