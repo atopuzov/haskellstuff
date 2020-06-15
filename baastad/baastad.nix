@@ -1,5 +1,5 @@
-{ mkDerivation, base, hpack, mtl, QuickCheck
-, quickcheck-classes-base, stdenv, transformers
+{ mkDerivation, base, hpack, mtl, QuickCheck, quickcheck-classes
+, stdenv, transformers
 }:
 mkDerivation {
   pname = "baastad";
@@ -7,11 +7,15 @@ mkDerivation {
   src = ./.;
   isLibrary = true;
   isExecutable = true;
-  libraryHaskellDepends = [ base mtl transformers ];
+  libraryHaskellDepends = [
+    base mtl quickcheck-classes transformers
+  ];
   libraryToolDepends = [ hpack ];
-  executableHaskellDepends = [ base mtl transformers ];
+  executableHaskellDepends = [
+    base mtl quickcheck-classes transformers
+  ];
   testHaskellDepends = [
-    base mtl QuickCheck quickcheck-classes-base transformers
+    base mtl QuickCheck quickcheck-classes transformers
   ];
   prePatch = "hpack";
   homepage = "https://github.com/atopuzov/baastad#readme";
