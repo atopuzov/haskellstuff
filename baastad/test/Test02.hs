@@ -2,13 +2,10 @@ module Test02 where
 import           Eval02
 
 import           Data.Functor.Identity
-import           MonadLaws
-
-import           Test.QuickCheck          (quickCheck)
-import           Test.QuickCheck.Function (Fun)
-
+import           Test.QuickCheck.Classes  (lawsCheck, functorLaws, applicativeLaws, monadLaws)
+import           Data.Data                (Proxy (..))
 
 testMonad = do
-  quickCheck (prop_LeftUnit :: Int -> Fun Int (Identity Int) -> Bool)
-  quickCheck (prop_RightUnit :: Identity Int -> Bool)
-  quickCheck (prop_Assoc :: Identity Int -> Fun Int (Identity String) -> Fun String (Identity Double) -> Bool)
+  lawsCheck (functorLaws (Proxy :: Proxy Identity))
+  lawsCheck (applicativeLaws (Proxy :: Proxy Identity))
+  lawsCheck (monadLaws (Proxy :: Proxy Identity))

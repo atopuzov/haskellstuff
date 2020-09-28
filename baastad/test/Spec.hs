@@ -11,16 +11,16 @@ import qualified Test32
 main :: IO ()
 main = do
   Test01.testMonad
-  Test02.testMonad
+  -- Test02.testMonad
 
-  putStrLn "Exceptions"
-  Test11.testMonad
-  Test12.testMonad
+  -- putStrLn "Exceptions"
+  -- Test11.testMonad
+  -- Test12.testMonad
 
-  putStrLn "State"
-  -- Test21.testMonad
-  Test22.testMonad
+  -- putStrLn "State"
+  -- -- Test21.testMonad
+  -- Test22.testMonad
 
-  putStrLn "Writer"
-  Test31.testMonad
-  Test32.testMonad
+  -- putStrLn "Writer"
+  -- Test31.testMonad
+  -- Test32.testMonad
