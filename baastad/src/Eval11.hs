@@ -24,6 +24,9 @@ instance Monad M where
     Return fa -> Return fa
     Raise s   -> Raise s
   (Raise s) >>= f = Raise s
+
+instance MonadFail M where
+  -- fail :: String -> m a
   fail = Raise
 
 eval :: Term -> M Int
