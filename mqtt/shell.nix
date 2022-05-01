@@ -1,8 +1,9 @@
 {
-  ghcVersion ? "ghc865"
+  ghcVersion ? "ghc8107"
 }:
 let
-  nixpkgs = import ./nixpkgs.nix;
+  sources = import ./nix/sources.nix;
+  nixpkgs = sources.nixpkgs;
   pkgs = import nixpkgs {};
   drv = import ./default.nix { };
   compiler = pkgs.pkgs.haskell.packages.${ghcVersion};

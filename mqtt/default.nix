@@ -1,8 +1,9 @@
 {
-  ghcVersion ? "ghc865"
+  ghcVersion ? "ghc8107"
 }:
 let
-  nixpkgs = import ./nixpkgs.nix;
+  sources = import ./nix/sources.nix;
+  nixpkgs = sources.nixpkgs;
   pkgs = import nixpkgs {};
 
   overrides = {
@@ -13,8 +14,8 @@ let
         src = pkgs.fetchFromGitHub {
           owner = "atopuzov";
           repo = "mqtt-hs";
-          rev = "e6d99d19d84b636775adb28e312a0ef8e2481896";
-          sha256 = "1cglyp55jxlq87k32apkyfbz4farrlw7qxp5w905ql4ss3gffv1d";
+          rev = "05b8b688a03fb6e047348eeb8bdff91ba50dd7d6";
+          sha256 = "sha256-AS+I1zYGpgxSRKRPukET1TGrf+wTNWZgqypzlicS0oM=";
         };
         broken = false;
       });
