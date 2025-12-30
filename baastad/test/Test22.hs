@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE UndecidableInstances #-}
 
+{-# LANGUAGE FlexibleContexts #-}
 module Test22 where
 import           Eval22
 
