@@ -7,9 +7,9 @@ import           Config
 import           Types
 
 import qualified Control.Exception       as E
-import           Control.Monad.Except    (MonadError, MonadIO, throwError)
+import           Control.Monad.Except    (MonadError, throwError)
 import           Control.Monad.IO.Class  (MonadIO, liftIO)
-import           Control.Monad.Reader    (MonadReader, asks)
+import           Control.Monad.Reader (MonadReader, asks, runReaderT)
 import           Data.Aeson              (decode, parseJSON, withObject, (.:),
                                           (.=))
 import           Data.Aeson.Types        (FromJSON, Parser)
@@ -25,7 +25,6 @@ import           Network.HTTP.Client.TLS
 import           Network.HTTP.Simple
 
 import           Control.Lens            ((&), (.~), (?~))
-import           Control.Monad.Reader    (runReaderT)
 
 
 -- https://developer.jcdecaux.com/#/home
@@ -45,8 +44,7 @@ getBikes = do
           $ setRequestQueryString
           [ ("contract", Just con)
           , ("apiKey", Just apiK)
-          ]
-          $ request
+          ] request
 
   response <- liftIO $ httpJSON request'
   return $ getResponseBody response
